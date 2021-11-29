@@ -55,8 +55,6 @@ char *ft_substr(char *s, int start, int len)
 		return (NULL);
 	new = malloc(sizeof(char) * len + 1);
 	*new = 0;
-	if (!s)
-		return (NULL);
 	if (start > len || !new)
 		return (new);
 	while (s && s[start] && i < len)
