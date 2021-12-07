@@ -146,7 +146,7 @@ char *get_next_line(int fd)
 
 	line = NULL;
 	end = 0;
-	if (BUFFER_SIZE < 0 || fd < 0)
+	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
 	if (save && findchar(save, '\n') > 0)
 	{
