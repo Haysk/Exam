@@ -26,7 +26,7 @@ char *ft_strjoin(char *s1, char *s2)
 	i = 0;
 	j = 0;
 	if (!s1 && !s2)
-		return (malloc(sizeof(char)));
+		return (NULL);
 	len_new = ft_strlen(s1) + ft_strlen(s2);
 	new = malloc(sizeof(char) * (len_new + 1));
 	*new = 0;
@@ -52,10 +52,10 @@ char *ft_substr(char *s, int start, int len)
 	int i;
 
 	i = 0;
-	new = malloc(sizeof(char) * len + 1);
-	if (!s || !new)
-		return (new);
 	if (start > ft_strlen(s))
+		return (NULL);
+	new = malloc(sizeof(char) * (len + 1));
+	if (!s || !new)
 		return (new);
 	*new = 0;
 	while (s && s[start] && i < len)
@@ -78,7 +78,7 @@ int	findchar(char *str, char c)
 	while (str[i])
 	{
 		if (str[i] == c)
-			return (1);
+			return (i + 1);
 		i++;
 	}
 	return (0);
@@ -90,19 +90,27 @@ int firstline(char **save, char **line)
 	int i;
 
 	i = 0;
-	if (**save == 0)
+	tmp = *save;
+	if (*tmp == 0)
 	{
-		if (*line)
-			free(*line);
+		free(*save);
 		*line = NULL;
 		return (0);
 	}
-	while (*(*save + i) && *(*save + i) != '\n')
-		i++;
-	*line = ft_substr(*save, 0, i + 1);
-	tmp = ft_substr(*save, i + 1, ft_strlen(*save) - i - 1);
-	free(*save);
-	*save = tmp;
+	i = findchar(tmp, '\n');
+	if (i != 0)
+	{
+		*line = ft_substr(tmp, 0, i);
+		tmp = ft_substr(tmp, i, ft_strlen(tmp));
+		free(*save);
+		*save = tmp;
+	}
+	else
+	{
+		*line = ft_substr(*save, 0, ft_strlen(tmp));
+		free(*save);
+		*save = NULL;
+	}
 	return (1);
 }
 
@@ -114,7 +122,7 @@ int	readfile(int fd, char **save)
 	end = BUFFER_SIZE;
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	*buffer = 0;
-	while (end == BUFFER_SIZE && !findchar(buffer, '\n'))
+	while (end == BUFFER_SIZE && findchar(buffer, '\n') == 0)
 	{
 		if ((end = read(fd, buffer, BUFFER_SIZE)) < 0)
 		{
@@ -140,23 +148,16 @@ char *get_next_line(int fd)
 	end = 0;
 	if (BUFFER_SIZE < 0 || fd < 0)
 		return (NULL);
-	if (save && findchar(save, '\n'))
+	if (save && findchar(save, '\n') > 0)
 	{
 		firstline(&save, &line);
 		return (line);
 	}
 	if ((end = readfile(fd, &save)) < 0)
 	{
-		line = malloc(1);
-		*line = 0;
-		return (line);
+		return (NULL);
 	}
 	firstline(&save, &line);
-	if (end == 0)
-	{
-		free(save);
-		save = 0;
-	}
 	return (line);
 }
 
