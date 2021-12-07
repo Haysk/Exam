@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <limits.h>
 
 int	ft_strlen(char *str)
 {
@@ -34,7 +35,7 @@ char *ft_strjoin(char *s1, char *s2)
 		new[i] = s1[i];
 		i++;
 	}
-	while (s2 && s2[j])
+	while (s2 && s2[j] && s2[j])
 	{
 		new[i] = s2[j];
 		i++;
@@ -43,7 +44,6 @@ char *ft_strjoin(char *s1, char *s2)
 	new[i] = 0;
 	free(s1);
 	return (new);
-
 }
 
 char *ft_substr(char *s, int start, int len)
@@ -109,10 +109,10 @@ int	readfile(int fd, char **save)
 	char *buffer;
 	int end;
 
-	end = 1;
+	end = BUFFER_SIZE;
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	*buffer = 0;
-	while (end > 0 && !findchar(buffer, '\n'))
+	while (end == BUFFER_SIZE && !findchar(buffer, '\n'))
 	{
 		if ((end = read(fd, buffer, BUFFER_SIZE)) < 0)
 		{
@@ -136,6 +136,8 @@ char *get_next_line(int fd)
 
 	line = NULL;
 	end = 0;
+	if (BUFFER_SIZE < 0 || fd < 0)
+		return (NULL);
 	if (save && findchar(save, '\n'))
 	{
 		firstline(&save, &line);
@@ -156,20 +158,4 @@ char *get_next_line(int fd)
 	return (line);
 }
 
-int main(int ac, char **av)
-{
-	char *line;
-	int fd;
 
-	if (ac == 2)
-		fd = open(av[1], O_RDONLY);
-	else
-		fd = 0;
-	line = get_next_line(fd);
-	while (line != NULL)
-	{
-		write(1, line, ft_strlen(line));
-		free(line);
-		line = get_next_line(fd);
-	}
-}
